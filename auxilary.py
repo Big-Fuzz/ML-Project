@@ -11,30 +11,9 @@ from weightedknn import weightedknn
 
 def score(train, test, feat,  func, k, kernel):
 
-    # For wknn
-#    if func in ["wknn","wknnprob"]:
-#        test_features = np.array(wtestfeatures)
-#        train_features = np.array(wtrainfeatures)
+    train_features = np.array(train[feat])
 
-    # For the rest
-#    else:
-    train_features = np.array(train[feat])#np.array(train[["radius_mean", "texture_mean", "perimeter_mean", "area_mean",
-#                                          "smoothness_mean", "compactness_mean", "concavity_mean", "concave points_mean",
-#                                          "symmetry_mean", "fractal_dimension_mean", "radius_se", "texture_se",
-#                                          "perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se",
-#                                          "concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst",
-#                                          "texture_worst", "perimeter_worst", "area_worst", "smoothness_worst",
-#                                          "compactness_worst", "concavity_worst", "concave points_worst",
-#                                          "symmetry_worst", "fractal_dimension_worst"]])
-
-    test_features = np.array(test[feat]) #np.array(test[["radius_mean", "texture_mean", "perimeter_mean", "area_mean",
-                                       #"smoothness_mean", "compactness_mean", "concavity_mean", "concave points_mean",
-                                       #"symmetry_mean", "fractal_dimension_mean", "radius_se", "texture_se",
-                                       #"perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se",
-                                       #"concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst",
-                                       #"texture_worst", "perimeter_worst", "area_worst", "smoothness_worst",
-                                       #"compactness_worst", "concavity_worst", "concave points_worst", "symmetry_worst",
-                                       #"fractal_dimension_worst"]])
+    test_features = np.array(test[feat])
 
     # Specifying Classes
     train_class = np.array(train["diagnosis"])
