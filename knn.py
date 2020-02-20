@@ -7,14 +7,12 @@ from distance import dist
         3.) Classify the new point based on those neighbors """
 
 
-
-
 class knn():
 
-    def __init__(self, n, l, v, k, sample):
-        self.n = np.array(n)
-        self.l = np.array(l)
-        self.v = np.array(v)
+    def __init__(self, features, labels, classes, k, sample):
+        self.n = np.array(features)
+        self.l = np.array(labels)
+        self.v = np.array(classes)
         self.k = k
         self.sample = np.array(sample)
 
@@ -38,9 +36,6 @@ class knn():
 
         return y
 
-
-
-
     # Method for final result (most common nearest neighbour)
     def nverdict(self):
 
@@ -60,7 +55,6 @@ class knn():
         a = 0
         b = 0
         s = 0
-        r = 0
 
         for i in range(len(y)):
             if y[i] == y[0]:

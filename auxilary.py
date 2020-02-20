@@ -5,11 +5,41 @@ from sklearn import preprocessing
 from sklearn import svm
 
 # Own Libraries/Classes
-from setdivision import TestTrain, TrainValidation, CrossValidation
+from setdivision import CrossValidation
 from knn import knn
 from weightedknn import weightedknn
 
+
 def score(train, test, feat,  func, k, kernel):
+    """
+    ############################################## Description #########################################################
+
+    score(train, test, feat, "method", k, "kernel"):
+
+    train: Training set
+
+    test: Test set
+
+    feat: Features to be tested of the set
+
+    method:
+    1.) KNN Score                                             knn
+    2.) KNN Score with Probability                            knnprob
+    3.) Weighted KNN Score                                    wknn
+    4.) Weighted KNN Score with probability                   wknnprob
+    5.) LR Score                                              lr
+    6.) SVM Score                                             svm
+
+    k : number of nearest neighbours
+
+    kernel: kernel for the svm method:
+
+    1.) linear
+    2.) poly
+    3.) rbf
+    4.) sigmoid
+    ####################################################################################################################
+    """
 
     train_features = np.array(train[feat])
 
@@ -51,8 +81,8 @@ def score(train, test, feat,  func, k, kernel):
 
         w = np.empty([0])
         for i in range(len(totcor)):
-            w = np.append(w, (totcor[i] / np.sum(totcor)))
-
+            w = np.append(w, 1-(totcor[i] / np.sum(totcor)))
+            #w = np.append(w, (totcor[i] / np.sum(totcor)))
     # Fit model for Logistic Regression lr
     if func == "lr":
         global lr_model
@@ -172,10 +202,10 @@ def score(train, test, feat,  func, k, kernel):
             else:
                 incorrect += 1
                 if test_class[s] == "M":
-                    loss += 0
+                    loss += 1
                     fp += 1
                 else:
-                    loss += 0
+                    loss += 1
                     fn += 1
 
         if func == "knnprob":
@@ -208,10 +238,10 @@ def score(train, test, feat,  func, k, kernel):
             else:
                 incorrect += 1
                 if test_class[s] == "M":
-                    loss += 0
+                    loss += 1
                     fp += 1
                 else:
-                    loss += 0
+                    loss += 1
                     fn += 1
 
         if func == "wknnprob":
@@ -276,9 +306,8 @@ def score(train, test, feat,  func, k, kernel):
 
     return [Accuracy, Loss, Sensitivity, Specificitiy]
 
-############################################################################################################################################################################################################################################
 
-def getinitialweights(train_features, train_class):
+def knn_correlation_weights(train_features, train_class):
     dia = train_class
     dia = np.array(dia)
     dianp = np.empty(0)
@@ -301,9 +330,8 @@ def getinitialweights(train_features, train_class):
 
     return w
 
-###########################################################################################################################################################################################################################################
 
-def knnscoregivenweights(train_features, test_features, train_labels, train_class, test_class, k, w):
+def weighted_knn_score(train_features, test_features, train_labels, train_class, test_class, k, w):
 
     correct = 0
     incorrect = 0
@@ -321,9 +349,8 @@ def knnscoregivenweights(train_features, test_features, train_labels, train_clas
 
     return ((correct/(len(test_class))) * 100)
 
-###########################################################################################################################################################################################################################################
 
-def mixedscore_prototype(train, validation, features, classes, labels, k, w, method1, method2):
+def joint_score(train, validation, features, classes, labels, k, w, method1, method2):
     w1 = w[0]
     w2 = w[1]
     methods = ["knn", "lr"]
@@ -417,11 +444,11 @@ def mixedscore_prototype(train, validation, features, classes, labels, k, w, met
 
     return [Loss, Accuracy, Sensitivity, Specificitiy]
 
-###########################################################################################################################################################################################################################################
 
-def mix(training, features, classes, labels, crossvalidationdiv, iterations ,k, w1, w2, w3, method1, method2):
+def joint_score_prev_current_next(training, features, classes, labels, crossvalidationdiv, iterations, k, w1, w2, w3,
+                                  method1, method2):
 
-    y1_accuracy =0
+    y1_accuracy = 0
     y2_accuracy = 0
     y3_accuracy = 0
     y1_loss = 0
@@ -467,7 +494,7 @@ def mix(training, features, classes, labels, crossvalidationdiv, iterations ,k, 
             validation_set = validation_sets[j]
 
             if (w1 != 0).all():
-                y1 = mixedscore_prototype(training_set, validation_set, features, classes, labels, k, w1, method1, method2)
+                y1 = joint_score(training_set, validation_set, features, classes, labels, k, w1, method1, method2)
                 #print(y1)
                 y1_accuracy_list = np.append(y1_accuracy_list, y1[1])
                 y1_loss_list = np.append(y1_loss_list, y1[0])
@@ -475,7 +502,7 @@ def mix(training, features, classes, labels, crossvalidationdiv, iterations ,k, 
                 y1_specificity_list = np.append(y1_specificity_list, y1[3])
 
             if (w2 != 0).all():
-                y2 = mixedscore_prototype(training_set, validation_set, features, classes, labels, k, w2, method1, method2)
+                y2 = joint_score(training_set, validation_set, features, classes, labels, k, w2, method1, method2)
                 #print(y2)
                 y2_accuracy_list = np.append(y2_accuracy_list, y2[1])
                 y2_loss_list = np.append(y2_loss_list, y2[0])
@@ -483,7 +510,7 @@ def mix(training, features, classes, labels, crossvalidationdiv, iterations ,k, 
                 y2_specificity_list = np.append(y2_specificity_list, y2[3])
 
             if (w3 != 0).all():
-                y3 = mixedscore_prototype(training_set, validation_set, features, classes, labels, k, w3, method1, method2)
+                y3 = joint_score(training_set, validation_set, features, classes, labels, k, w3, method1, method2)
                 #print(y3)
                 y3_accuracy_list = np.append(y3_accuracy_list, y3[1])
                 y3_loss_list = np.append(y3_loss_list, y3[0])
@@ -537,12 +564,15 @@ def mix(training, features, classes, labels, crossvalidationdiv, iterations ,k, 
         y3_loss = 0
         y3_sensitivity = 0
         y3_specificity = 0
-    return [[y1_loss, y2_loss, y3_loss],[y1_accuracy, y2_accuracy, y3_accuracy], [y1_sensitivity, y2_sensitivity, y3_sensitivity], [y1_specificity, y2_specificity, y3_specificity]]
+    return [[y1_loss, y2_loss, y3_loss],[y1_accuracy, y2_accuracy, y3_accuracy], [y1_sensitivity, y2_sensitivity,
+                                                                                  y3_sensitivity], [y1_specificity,
+                                                                                                    y2_specificity,
+                                                                                                    y3_specificity]]
 
-###########################################################################################################################################################################################################################################
 
-def findweightsmix(training, features, classes, labels, crossvalidationdiv, iterations, i, w, stepratio, k, method1,
-                   method2, direction_limit, iteration_limit, testvariable):
+def find_weights_joint(training, features, classes, labels, crossvalidationdiv, k_fold_iterations, i, w, stepratio, k,
+                       method1, method2, direction_limit, step_limit, testvariable):
+
     if testvariable == "loss":
         testvariable = 0
     if testvariable == "accuracy":
@@ -553,7 +583,7 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
         testvariable = 3
 
     if i == (len(w) - 1):
-        print("w lowest level", w)
+        #print("w lowest level", w)
         max = 0
         limit = 0
         direction_limit_count = 0
@@ -564,12 +594,13 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
         incw[i] = incw[i] + step
         nextw = np.empty(0)
         previous = 0
-        y = mix(training, features, classes, labels, crossvalidationdiv, iterations, k, decw, w, incw, method1, method2)
+        y = joint_score_prev_current_next(training, features, classes, labels, crossvalidationdiv, k_fold_iterations,
+                                          k, decw, w, incw, method1, method2)
         decscore = y[testvariable][0]
         score = y[testvariable][1]
         incscore = y[testvariable][2]
-        print(decw, w, incw)
-        print(decscore,score,incscore)
+        #print(decw, w, incw)
+        #print(decscore, score, incscore)
 
         if incscore >= score and incscore > decscore:
             step = step
@@ -580,14 +611,15 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
             previous = decscore
             nextw = decw
         if score == decscore and score == incscore:
-            print("hallaaaaaaaw")
+            #print("hallaaaaaaaw")
             while limit == 0:
                 direction_limit_count += 1
                 decw[i] = decw[i] - step
                 incw[i] = incw[i] + step
                 #print(incw,decw)
-                y = mix(training, features, classes, labels, crossvalidationdiv, iterations, k, decw, np.array([0, 0]), incw, method1,
-                        method2)
+                y = joint_score_prev_current_next(training, features, classes, labels, crossvalidationdiv,
+                                                  k_fold_iterations, k, decw, np.array([0, 0]), incw, method1,
+                                                  method2)
                 decscore = y[testvariable][0]
                 incscore = y[testvariable][2]
                 if incscore >= score and incscore > decscore:
@@ -613,13 +645,14 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
         while max == 0:
             iteration_limit_count += 1
             nextw[i] = nextw[i] + step
-            y = mix(training, features, classes, labels, crossvalidationdiv, iterations, k, np.array([0, 0]), np.array([0, 0]), nextw, method1,
-                    method2)
+            y = joint_score_prev_current_next(training, features, classes, labels, crossvalidationdiv,
+                                              k_fold_iterations, k, np.array([0, 0]), np.array([0, 0]), nextw, method1,
+                                              method2)
             nextscore = y[testvariable][2]
-            print("low level next and previous: ", nextw, nextw[i] - step, nextscore, previous)
+            #print("low level next and previous: ", nextw, nextw[i] - step, nextscore, previous)
             if nextscore >= previous:
                 previous = nextscore
-            if iteration_limit_count == iteration_limit:
+            if iteration_limit_count == step_limit:
                 max = 1
                 nextw[i] = nextw[i] - step
                 array = [previous, nextw]
@@ -628,11 +661,11 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
                 max = 1
                 nextw[i] = nextw[i] - step
                 array = [previous, nextw]
-                print("lowest level return: ", array)
+                #print("lowest level return: ", array)
                 return array
 
     else:
-        print("w highest level level", w)
+        #print("w highest level level", w)
         max = 0
         limit = 0
         direction_limit_count = 0
@@ -643,16 +676,22 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
         incw[i] = incw[i] + step
         nextw = np.empty(0)
         previous = 0
-        print("High level:", decw, w, incw)
+        #print("High level:", decw, w, incw)
 
-        incscore = findweightsmix(training, features, classes, labels, crossvalidationdiv, iterations, i + 1, incw, stepratio, k, method1, method2, direction_limit, iteration_limit, testvariable)#[0]
+        incscore = find_weights_joint(training, features, classes, labels, crossvalidationdiv, k_fold_iterations,
+                                      i + 1, incw, stepratio, k, method1, method2, direction_limit, step_limit,
+                                      testvariable)#[0]
         #print("incscore: ", incscore)
-        decscore = findweightsmix(training, features, classes, labels, crossvalidationdiv, iterations, i + 1, decw, stepratio, k, method1, method2, direction_limit, iteration_limit, testvariable)#[0]
+        decscore = find_weights_joint(training, features, classes, labels, crossvalidationdiv, k_fold_iterations,
+                                      i + 1, decw, stepratio, k, method1, method2, direction_limit, step_limit,
+                                      testvariable)#[0]
         #print("decscore:", decscore)
-        score = findweightsmix(training, features, classes, labels, crossvalidationdiv, iterations, i + 1, w, stepratio, k, method1, method2, direction_limit, iteration_limit, testvariable)#[0]
+        score = find_weights_joint(training, features, classes, labels, crossvalidationdiv, k_fold_iterations,
+                                   i + 1, w, stepratio, k, method1, method2, direction_limit, step_limit,
+                                   testvariable)#[0]
         #print("score: ", score)
-        print("High level:", decw, w, incw)
-        print("High level:", decscore, score, incscore)
+        #print("High level:", decw, w, incw)
+        #print("High level:", decscore, score, incscore)
 
         if incscore[0] >= score[0] and incscore[0] > decscore[0]:
             step = step
@@ -669,8 +708,12 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
                 decw[i] = decw[i] - step
                 incw[i] = incw[i] + step
                 #print(incw, decw)
-                incscore = findweightsmix(training, features, classes, labels, crossvalidationdiv, iterations, i + 1, incw, stepratio, k, method1, method2, direction_limit, iteration_limit, testvariable)#[0]
-                decscore = findweightsmix(training, features, classes, labels, crossvalidationdiv, iterations, i + 1, decw, stepratio, k, method1, method2, direction_limit, iteration_limit, testvariable)#[0]
+                incscore = find_weights_joint(training, features, classes, labels, crossvalidationdiv,
+                                              k_fold_iterations, i + 1, incw, stepratio, k, method1, method2,
+                                              direction_limit, step_limit, testvariable)#[0]
+                decscore = find_weights_joint(training, features, classes, labels, crossvalidationdiv,
+                                              k_fold_iterations, i + 1, decw, stepratio, k, method1, method2,
+                                              direction_limit, step_limit, testvariable)#[0]
                 if incscore[0] >= score[0] and incscore[0] > decscore[0]:
                     limit = 1
                     step = step
@@ -696,11 +739,13 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
         while max == 0:
             iteration_limit_count +=1
             nextw[i] = nextw[i] + step
-            nextscore = findweightsmix(training, features, classes, labels, crossvalidationdiv, iterations, i + 1, nextw, stepratio, k, method1, method2, direction_limit, iteration_limit, testvariable)#[0]
+            nextscore = find_weights_joint(training, features, classes, labels, crossvalidationdiv, k_fold_iterations,
+                                           i + 1, nextw, stepratio, k, method1, method2, direction_limit,
+                                           step_limit, testvariable)#[0]
             #print(nextscore, previous)
             if nextscore[0] >= previous[0]:
                 previous = nextscore
-            if iteration_limit_count == iteration_limit: # elif
+            if iteration_limit_count == step_limit: # elif
                 max = 1
                 nextw[i] = nextw[i] - step
                 array = [previous]#, nextw]
@@ -711,241 +756,5 @@ def findweightsmix(training, features, classes, labels, crossvalidationdiv, iter
                 array = [previous]#, nextw]
                 return array
 
-###########################################################################################################################################################################################################################################
-
-def mix2(training_set, validation_set , features, classes, labels, k, w1, w2, w3, method1, method2):
-    y1_accuracy = 0
-    y2_accuracy = 0
-    y3_accuracy = 0
-    y1_loss = 0
-    y2_loss = 0
-    y3_loss = 0
-    y1_specificity = 0
-    y2_specificity = 0
-    y3_specificity = 0
-    y1_sensitivity = 0
-    y2_sensitivity = 0
-    y3_sensitivity = 0
-
-    if (w1 != 0).all():
-        y1 = mixedscore_prototype(training_set, validation_set, features, classes, labels, k, w1, method1, method2)
-        y1_accuracy = y1[1]
-        y1_loss = y1[0]
-        y1_sensitivity = y1[2]
-        y1_specificity = y1[3]
-
-    if (w2 != 0).all():
-        y2 = mixedscore_prototype(training_set, validation_set, features, classes, labels, k, w2, method1, method2)
-        y2_accuracy = y2[1]
-        y2_loss = y2[0]
-        y2_sensitivity = y2[2]
-        y2_specificity = y2[3]
-
-    if (w3 != 0).all():
-        y3 = mixedscore_prototype(training_set, validation_set, features, classes, labels, k, w3, method1, method2)
-        y3_accuracy = y3[1]
-        y3_loss = y3[0]
-        y3_sensitivity = y3[2]
-        y3_specificity = y3[3]
 
 
-    if (w1 == 0).all():
-        y1_accuracy = 0
-        y1_loss = 0
-        y1_sensitivity = 0
-        y1_specificity = 0
-
-    if (w2 == 0).all():
-        y2_accuracy = 0
-        y2_loss =0
-        y2_sensitivity = 0
-        y2_specificity = 0
-
-    if (w3 == 0).all():
-        y3_accuracy = 0
-        y3_loss = 0
-        y3_sensitivity = 0
-        y3_specificity = 0
-
-    return [[y1_loss, y2_loss, y3_loss],[y1_accuracy, y2_accuracy, y3_accuracy], [y1_sensitivity, y2_sensitivity,
-                                                                                  y3_sensitivity], [y1_specificity,
-                                                                                                    y2_specificity,
-                                                                                                    y3_specificity]]
-
-###########################################################################################################################################################################################################################################
-
-def findweightsmix2(training, validation, features, classes, labels, i, w, stepratio, k, method1, method2,
-                    direction_limit, iteration_limit, testvariable):
-    if testvariable == "loss":
-        testvariable = 0
-    if testvariable == "accuracy":
-        testvariable = 1
-    if testvariable == "sensitivity":
-        testvariable = 2
-    if testvariable == "specificity":
-        testvariable = 3
-
-    if i == (len(w) - 1):
-        #print("w lowest level", w)
-        max = 0
-        limit = 0
-        direction_limit_count = 0
-        decw = np.array(w)
-        incw = np.array(w)
-        step = w[i] * stepratio
-        decw[i] = decw[i] - step
-        incw[i] = incw[i] + step
-        nextw = np.empty(0)
-        previous = 0
-        y = mix2(training, validation, features, classes, labels,  k, decw, w, incw, method1, method2)
-        decscore = y[testvariable][0]
-        score = y[testvariable][1]
-        incscore = y[testvariable][2]
-        #print(decw, w, incw)
-        #print(decscore, score, incscore)
-
-        if incscore >= score and incscore > decscore:
-            step = step
-            previous = incscore
-            nextw = incw
-        if decscore >= score and decscore > incscore:
-            step = -step
-            previous = decscore
-            nextw = decw
-        if (score == decscore and score == incscore) or (incscore == decscore and incscore > score):
-            #print("hallaaaaaaaw")
-            while limit == 0:
-                direction_limit_count += 1
-                decw[i] = decw[i] - step
-                incw[i] = incw[i] + step
-                #print(incw,decw)
-                y = mix2(training, validation, features, classes, labels,  k, decw, np.array([0, 0]), incw, method1,
-                        method2)
-                decscore = y[testvariable][0]
-                incscore = y[testvariable][2]
-                if incscore >= score and incscore > decscore:
-                    limit = 1
-                    step = step
-                    previous = incscore
-                    nextw = incw
-                if decscore >= score and decscore > incscore:
-                    limit = 1
-                    step = -step
-                    previous = decscore
-                    nextw = decw
-                if score > decscore and score > incscore:
-                    return [score, w]
-                if direction_limit_count == direction_limit:
-                    #print("iterations saturated")
-                    return [score, w]
-        if score > decscore and score > incscore :
-            return [score, w]
-        #print(step)
-
-        iteration_limit_count = 0
-        while max == 0:
-            iteration_limit_count +=1
-            nextw[i] = nextw[i] + step
-            y = mix2(training, validation, features, classes, labels, k, np.array([0, 0]), np.array([0, 0]), nextw, method1,
-                    method2)
-            nextscore = y[testvariable][2]
-            #print("low level next and previous: ", nextw, nextw[i] - step, nextscore, previous)
-            if nextscore >= previous:
-                previous = nextscore
-            if iteration_limit_count == iteration_limit:
-                max = 1
-                nextw[i] = nextw[i] - step
-                array = [previous, nextw]
-                return array
-            if previous > nextscore:
-                max = 1
-                nextw[i] = nextw[i] - step
-                array = [previous, nextw]
-                #print("lowest level return: ", array)
-                return array
-
-    else:
-        #print("w highest level level", w)
-        max = 0
-        limit = 0
-        direction_limit_count = 0
-        decw = np.array(w)
-        incw = np.array(w)
-        step = w[i] * stepratio
-        decw[i] = decw[i] - step
-        incw[i] = incw[i] + step
-        nextw = np.empty(0)
-        previous = 0
-        #print("High level:", decw, w, incw)
-
-        incscore = findweightsmix2(training, validation, features, classes, labels,  i + 1, incw, stepratio, k, method1,
-                                  method2, direction_limit, iteration_limit, testvariable)
-        #print("incscore: ", incscore)
-        decscore = findweightsmix2(training, validation, features, classes, labels, i + 1, decw, stepratio, k, method1,
-                                  method2, direction_limit, iteration_limit, testvariable)
-        #print("decscore:", decscore)
-        score = findweightsmix2(training, validation, features, classes, labels, i + 1, w, stepratio, k, method1,
-                               method2, direction_limit, iteration_limit, testvariable)
-        #print("score: ", score)
-        #print("High level:", decw, w, incw)
-        #print("High level:", decscore, score, incscore)
-
-        if incscore[0] >= score[0] and incscore[0] > decscore[0]:
-            step = step
-            previous = incscore
-            nextw = incw
-        if decscore[0] >= score[0] and decscore[0] > incscore[0]:
-            step = -step
-            previous = decscore
-            nextw = decw
-        if score[0] == decscore[0] and score[0] == incscore[0] or (incscore == decscore and incscore > score) :
-            #print("hallaaaaaaaw2")
-            while limit == 0:
-                direction_limit_count += 1
-                decw[i] = decw[i] - step
-                incw[i] = incw[i] + step
-                #print(incw, decw)
-                incscore = findweightsmix2(training, validation, features, classes, labels, i + 1, incw, stepratio, k,
-                                           method1, method2, direction_limit, iteration_limit, testvariable)
-                decscore = findweightsmix2(training, validation, features, classes, labels, i + 1, decw, stepratio, k,
-                                           method1, method2, direction_limit, iteration_limit, testvariable)
-                if incscore[0] >= score[0] and incscore[0] > decscore[0]:
-                    limit = 1
-                    step = step
-                    previous = incscore
-                    nextw = incw
-                if decscore[0] >= score[0] and decscore[0] > incscore[0]:
-                    limit = 1
-                    step = -step
-                    previous = decscore
-                    nextw = decw
-                if score[0] > decscore[0] and score[0] > incscore[0]:
-                    #print(score,decscore,incscore)
-                    return [score]#, w])
-                if direction_limit_count == direction_limit:
-                    #print("iterations saturated")
-                    #print(score, decscore, incscore)
-                    return [score]#, w]
-        if score[0] > decscore[0] and score[0] > incscore[0]:
-            return [score]#, w]
-        #print(step)
-
-        iteration_limit_count = 0
-        while max == 0:
-            iteration_limit_count +=1
-            nextw[i] = nextw[i] + step
-            nextscore = findweightsmix2(training, validation, features, classes, labels, i + 1, nextw, stepratio, k,
-                                       method1, method2, direction_limit, iteration_limit, testvariable)
-            #print(nextscore, previous)
-            if nextscore[0] >= previous[0]:
-                previous = nextscore
-            if iteration_limit_count == iteration_limit:
-                max = 1
-                nextw[i] = nextw[i] - step
-                array = [previous]
-                return array
-            if previous[0] > nextscore[0]:
-                max = 1
-                nextw[i] = nextw[i] - step
-                array = [previous]
-                return array
