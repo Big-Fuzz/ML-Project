@@ -6,49 +6,22 @@ from statistics import mean
 from setdivision import TestTrain, CrossValidation
 from auxilary import score
 
-""""
-############################################## Description ############################################################
-
-score(train, test, "method", wtrain, wtest, k, "kernel"):
-
-train: Training set
-
-test: Test set
-
-method:
-1.) KNN Score                                             knn
-2.) KNN Score with Probability                            knnprob
-3.) Weighted KNN Score                                    wknn
-4.) Weighted KNN Score with probability                   wknnprob
-5.) LR Score                                              lr
-6.) SVM Score                                             svm
-
-wtrain: training features for weighted methods
-
-wtest: test features for weighedted methods
-
-k : number of nearest neighbours
-
-kernel: kernel for the svm method:
-
-1.) linear
-2.) poly
-3.) rbf
-4.) sigmoid
-"""
-
-
-
 ################################################## Finding the best K for the Knn method
 # data = pd.read_csv("data.csv")
 # df = pd.DataFrame(data)
 # TrainTestdiv = 20
-# iterations = 50
+# iterations = 100
 # knn_array = np.empty(0)
 # knn_matrix = np.empty(0)
 # neighbours = 20
 # kernel = "poly"
-#
+# feat = ["radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean",
+#                         "compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean",
+#                         "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se",
+#                         "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se",
+#                         "fractal_dimension_se", "radius_worst", "texture_worst", "perimeter_worst",
+#                         "area_worst", "smoothness_worst", "compactness_worst", "concavity_worst",
+#                         "concave points_worst", "symmetry_worst", "fractal_dimension_worst"]
 # # Iterate to get more than one score for each K
 # for j in range(iterations):
 #     knn_array = np.empty(0)
@@ -58,7 +31,7 @@ kernel: kernel for the svm method:
 #
 #     # loop through neighbours finding score with each k
 #     for k in range(1,neighbours):
-#         knn = score(train, test, "knn", wtrain, wtest, k, kernel)
+#         knn = score(train, test, feat, "knn", k, kernel)[0]
 #         knn_array = np.append(knn_array, knn)
 #     if j == 0:
 #         knn_matrix = knn_array # Initialize first row of matirix
@@ -71,20 +44,28 @@ kernel: kernel for the svm method:
 #     final = np.append(final, mean(knn_matrix[:,i]))
 # print(final)
 # print(max(final))
-# k =  np.where(final == max(final))
+# k = np.where(final == max(final))
 # print(k)
-#
-#
-#
-# ################################################ Finding the best kernal for the svm method
+
+
+
+# ################################################ Finding the best kernel for the svm method
 # data = pd.read_csv("data.csv")
 # df = pd.DataFrame(data)
 # TrainTestdiv = 20
 # iterations = 20
 # svm_array = np.empty(0)
 # svm_matrix = np.empty(0)
-# kernels= np.array(["linear","poly","rbf","sigmoid"])
+# kernels = np.array(["linear", "poly", "rbf", "sigmoid"])
 # k = 10
+# feat = ["radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean",
+#                         "compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean",
+#                         "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se",
+#                         "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se",
+#                         "fractal_dimension_se", "radius_worst", "texture_worst", "perimeter_worst",
+#                         "area_worst", "smoothness_worst", "compactness_worst", "concavity_worst",
+#                         "concave points_worst", "symmetry_worst", "fractal_dimension_worst"]
+#
 # # Iterate to get more than one score for each K
 # for j in range(iterations):
 #     svm_array = np.empty(0)
@@ -94,7 +75,7 @@ kernel: kernel for the svm method:
 #
 #     # loop through neighbours finding score with each k
 #     for f in range(len(kernels)):
-#         svm = score(train, test, "svm", wtrain, wtest, k, kernels[f])
+#         svm = score(train, test, feat, "svm", k, kernels[f])[0]
 #         svm_array = np.append(svm_array, svm)
 #     if j == 0:
 #         svm_matrix = svm_array # Initialize first row of matirix
@@ -109,10 +90,10 @@ kernel: kernel for the svm method:
 # print(max(final))
 # k = np.where(final == max(final))
 # print(kernels[k])
+#
 
 
-
-################################################# Finding scores of all methods
+# ################################################ Finding scores of all methods
 # data = pd.read_csv("data.csv")
 # df = pd.DataFrame(data)
 # TrainTestdiv = 20
@@ -131,44 +112,34 @@ kernel: kernel for the svm method:
 # svm_array = np.empty(0)
 # svmpen_array = np.empty(0)
 #
+# feat = ["radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean",
+#                         "compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean",
+#                         "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se",
+#                         "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se",
+#                         "fractal_dimension_se", "radius_worst", "texture_worst", "perimeter_worst",
+#                         "area_worst", "smoothness_worst", "compactness_worst", "concavity_worst",
+#                         "concave points_worst", "symmetry_worst", "fractal_dimension_worst"]
+# wfeat = ["texture_worst", "perimeter_worst", "smoothness_worst", "concave points_worst",
+#          "symmetry_worst"]
 # for j in range(iterations):
 #     train, test = TestTrain(df, TrainTestdiv)
-#     wtrain = train[["texture_worst", "perimeter_worst", "smoothness_worst", "concave points_worst",
-#                     "symmetry_worst"]]
-#     wtest = test[["texture_worst", "perimeter_worst", "smoothness_worst", "concave points_worst",
-#                   "symmetry_worst"]]
 #
-#     # wtrain = train[["radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean",
-#     #                          "compactness_mean", "concavity_mean", "concave points_mean", "symmetry_mean",
-#     #                          "fractal_dimension_mean", "radius_se", "texture_se", "perimeter_se", "area_se",
-#     #                          "smoothness_se", "compactness_se", "concavity_se", "concave points_se", "symmetry_se",
-#     #                          "fractal_dimension_se", "radius_worst", "texture_worst", "perimeter_worst", "area_worst",
-#     #                          "smoothness_worst", "compactness_worst", "concavity_worst", "concave points_worst",
-#     #                          "symmetry_worst", "fractal_dimension_worst"]]
-#     #
-#     # wtest = test[["radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean", "compactness_mean",
-#     #               "concavity_mean", "concave points_mean", "symmetry_mean", "fractal_dimension_mean", "radius_se",
-#     #               "texture_se", "perimeter_se", "area_se", "smoothness_se", "compactness_se", "concavity_se",
-#     #               "concave points_se", "symmetry_se", "fractal_dimension_se", "radius_worst", "texture_worst",
-#     #               "perimeter_worst", "area_worst", "smoothness_worst", "compactness_worst", "concavity_worst",
-#     #               "concave points_worst", "symmetry_worst", "fractal_dimension_worst"]]
-#
-#     knn = score(train, test, "knn", wtrain, wtest, k, kernel)[0]
+#     knn = score(train, test, feat, "knn", k, kernel)[0]
 #     knn_array = np.append(knn_array, knn)
 #
-#     knnprob = score(train, test, "knnprob", wtrain, wtest, k, kernel)[0]
+#     knnprob = score(train, test, feat, "knnprob", k, kernel)[0]
 #     knnprob_array = np.append(knnprob_array, knnprob)
 #
-#     wknn = score(train, test, "wknn", wtrain, wtest, k, kernel)[0]
+#     wknn = score(train, test, wfeat, "wknn", k, kernel)[0]
 #     wknn_array = np.append(wknn_array, wknn)
 #
-#     wknnprob = score(train, test, "wknnprob", wtrain, wtest, k, kernel)[0]
+#     wknnprob = score(train, test, wfeat, "wknnprob", k, kernel)[0]
 #     wknnprob_array = np.append(wknnprob_array, wknnprob)
 #
-#     lr = score(train, test, "lr", wtrain, wtest, k, kernel)[0]
+#     lr = score(train, test, feat, "lr", k, kernel)[0]
 #     lr_array = np.append(lr_array, lr)
 #
-#     svm = score(train, test, "svm", wtrain, wtest, k, kernel)[0]
+#     svm = score(train, test, feat, "svm", k, kernel)[0]
 #     svm_array = np.append(svm_array, svm)
 #
 #
@@ -186,27 +157,25 @@ kernel: kernel for the svm method:
 # print("wknnprob score: ", wknnprob)
 # print("lr score: ", lr)
 # print("svm score: ", svm)
-
-
-
+#
+#
+#
 ####################################### Finding scores of all methods through Cross-Testing
 data = pd.read_csv("data.csv")
 df = pd.DataFrame(data)
 TrainTestdiv = 20
-iterations = 20 #*5
-k = 10
+iterations = 50
+k = 11
 kernel = "linear"
 
 knn_array = np.empty(0)
+knn_array_2 = np.empty(0)
 knnprob_array = np.empty(0)
-knnpen_array = np.empty(0)
 wknn_array = np.empty(0)
 wknnprob_array = np.empty(0)
-wknnpen_array = np.empty(0)
 lr_array = np.empty(0)
-lrpen_array = np.empty(0)
 svm_array = np.empty(0)
-svmpen_array = np.empty(0)
+
 
 for j in range(iterations):
 
@@ -219,7 +188,7 @@ for j in range(iterations):
                         "area_worst", "smoothness_worst", "compactness_worst", "concavity_worst",
                         "concave points_worst", "symmetry_worst", "fractal_dimension_worst"]
     wfeat = ["texture_worst", "perimeter_worst", "smoothness_worst", "concave points_worst", "symmetry_worst"]
-    feat = wfeat
+    #feat = wfeat
     for i in range(len(testsets)):
         train = trainsets[i]
         test = testsets[i]
@@ -227,11 +196,15 @@ for j in range(iterations):
         knn = score(train, test, feat, "knn", k, kernel)[0]
         knn_array = np.append(knn_array, knn)
 
+#        knn_2 = score(train, test, feat, "knn", k, kernel)[0]
+ #       knn_array_2 = np.append(knn_array, knn)
+
         knnprob = score(train, test, feat, "knnprob", k, kernel)[0]
         knnprob_array = np.append(knnprob_array, knnprob)
 
         wknn = score(train, test, wfeat, "wknn", k, kernel)[0]
         wknn_array = np.append(wknn_array, wknn)
+
 
         wknnprob = score(train, test, wfeat, "wknnprob", k, kernel)[0]
         wknnprob_array = np.append(wknnprob_array, wknnprob)
@@ -244,6 +217,7 @@ for j in range(iterations):
 
 
 knn = mean(knn_array)
+#knn_2 = mean(knn_array_2)
 knnprob = mean(knnprob_array)
 wknn = mean(wknn_array)
 wknnprob = mean(wknnprob_array)
@@ -252,6 +226,7 @@ svm = mean(svm_array)
 
 print("Scores through cross testing after", iterations, "iterations: ")
 print("knn score: ", knn)
+#print("knn score 2: ", knn_2)
 print("knnprob score: ", knnprob)
 print("wknn score: ", wknn)
 print("wknnprob score: ", wknnprob)

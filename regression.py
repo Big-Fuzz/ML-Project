@@ -113,7 +113,8 @@ class regression():
 
                 Coe = 0  # Resetting value of coeffiecient
 
-                if i == len(self.X.columns) - 1:  # Once row loop is done, insert summation of values of corresponding j-dimension into last row
+                if i == len(self.X.columns) - 1:  # Once row loop is done, insert summation of values of corresponding
+                    # j-dimension into last row
                     last_row = np.append(last_row, X2_Sum)
                     M_row = np.append(M_row, X2_Sum)
                     C = np.append(C, Cx )
