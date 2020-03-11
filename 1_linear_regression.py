@@ -20,10 +20,10 @@ print("The slope is: ", m, "The y-intercept is: ", b)
 
 # Testing for 3 defined points in 3 dimensions
 
-ran = 100
-x = [25, 15, 67]
-y = [36, 48, 16]
-z = [49, 15, 37]
+ran = 50
+x = [5, 15, 17]
+y = [6, 8, 16]
+z = [9, 12, 13]
 
 O = regression(x, y, z, 0, 0, 0)
 m1, m2, b = O.linear_3D()
@@ -34,15 +34,15 @@ ax = plt.axes(projection='3d')
 
 x1 = [0, ran]
 x2 = [0, ran]
-zline = [m1 *x1[0] + m2 *x2[0]+ b, m1 * x1[1] + m2 * x2[1] + b]
+zline = [m1 *x1[0] + m2 * x2[0] + b, m1 * x1[1] + m2 * x2[1] + b]
 ax.plot3D(x1, x2, zline, 'gray')
 ax.scatter3D(x, y, z,  c=None, cmap='Greens')
 plt.show()
 
 
 # Testing for multiple points in 3 dimensions
-ran = 20
-total_points = 19
+ran = 10
+total_points = 5
 x = random.sample(range(0, ran), total_points)
 y = random.sample(range(0, ran), total_points)
 z = random.sample(range(0, ran), total_points)
